@@ -1,0 +1,72 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+import pygame
+
+class MusicPlayer:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Music Player")
+
+        self.playlist = []
+        self.current_index = 0
+
+        self.init_gui()
+
+        pygame.init()
+
+    def init_gui(self):
+        self.playlistbox = tk.Listbox(self.master, selectmode=tk.SINGLE, bg="black", fg="white", selectbackground="gray")
+        self.playlistbox.pack(pady=20)
+
+        self.play_button = tk.Button(self.master, text="Play", command=self.play_music)
+        self.play_button.pack(pady=10)
+
+        self.stop_button = tk.Button(self.master, text="Stop", command=self.stop_music)
+        self.stop_button.pack(pady=10)
+
+        self.pause_button = tk.Button(self.master, text="Pause", command=self.pause_music)
+        self.pause_button.pack(pady=10)
+
+        self.resume_button = tk.Button(self.master, text="Resume", command=self.resume_music)
+        self.resume_button.pack(pady=10)
+
+        self.volume_scale = tk.Scale(self.master, from_=0, to=100, orient=tk.HORIZONTAL, label="Volume", command=self.set_volume)
+        self.volume_scale.set(50)
+        self.volume_scale.pack(pady=10)
+
+        self.add_button = tk.Button(self.master, text="Add Song", command=self.add_song)
+        self.add_button.pack(pady=20)
+
+    def play_music(self):
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.unpause()
+        else:
+            selected_song = self.playlistbox.get(tk.ACTIVE)
+            selected_song_path = os.path.join(self.current_folder, selected_song)
+            pygame.mixer.music.load(selected_song_path)
+            pygame.mixer.music.play()
+
+    def stop_music(self):
+        pygame.mixer.music.stop()
+
+    def pause_music(self):
+        pygame.mixer.music.pause()
+
+    def resume_music(self):
+        pygame.mixer.music.unpause()
+
+    def set_volume(self, val):
+        volume = int(val) / 100
+        pygame.mixer.music.set_volume(volume)
+
+    def add_song(self):
+        song_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.mp3;*.wav")])
+        song_name = os.path.basename(song_path)
+        self.playlist.append(song_name)
+        self.playlistbox.insert(tk.END, song_name)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MusicPlayer(root)
+    root.mainloop()
